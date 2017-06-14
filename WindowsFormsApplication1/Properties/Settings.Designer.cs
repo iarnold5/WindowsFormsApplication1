@@ -56,13 +56,27 @@ namespace ProjectTitanium.Properties {
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
+        [global::System.Configuration.DefaultSettingValueAttribute("user@au1.ibm.com")]
+        public string lastUserEmail {
+            get {
+                return ((string)(this["lastUserEmail"]));
+            }
+            set {
+                this["lastUserEmail"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("server=localhost;user id=root;database=launchpad")]
         public string launchpadConnectionString {
             get {
                 return ((string)(this["launchpadConnectionString"]));
+            }
+            set {
+                this["launchpadConnectionString"] = value;
             }
         }
     }

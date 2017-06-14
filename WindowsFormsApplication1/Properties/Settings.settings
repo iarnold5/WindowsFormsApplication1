@@ -11,12 +11,10 @@
     <Setting Name="team_id" Type="System.String" Scope="User">
       <Value Profile="(Default)">IBM</Value>
     </Setting>
-    <Setting Name="launchpadConnectionString" Type="(Connection string)" Scope="Application">
-      <DesignTimeValue Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
-&lt;SerializableConnectionString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
-  &lt;ConnectionString&gt;server=localhost;user id=root;database=launchpad&lt;/ConnectionString&gt;
-  &lt;ProviderName&gt;MySql.Data.MySqlClient&lt;/ProviderName&gt;
-&lt;/SerializableConnectionString&gt;</DesignTimeValue>
+    <Setting Name="lastUserEmail" Type="System.String" Scope="User">
+      <Value Profile="(Default)">user@au1.ibm.com</Value>
+    </Setting>
+    <Setting Name="launchpadConnectionString" Type="System.String" Scope="User">
       <Value Profile="(Default)">server=localhost;user id=root;database=launchpad</Value>
     </Setting>
   </Settings>

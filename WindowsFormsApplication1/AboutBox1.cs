@@ -107,10 +107,12 @@ namespace ProjectTitanium
         {
             clickno++;
 
+            // I think this could be really funny and light hearted, but it could get me in serious trouble. Fingers crossed on this one, hope it's not too much...
+
             switch (clickno)
             {
                 case 1:
-                    MessageBox.Show("Great Click!!\nYou found me!!!\nClick 'π' again!! :D", "Creator's Note");
+                    MessageBox.Show("Lucky Click!!\nYou found me!!!\nClick 'π' again!! :D", "Creator's Note");
                     label1.ForeColor = Color.Green;
                     break;
                 case 5:

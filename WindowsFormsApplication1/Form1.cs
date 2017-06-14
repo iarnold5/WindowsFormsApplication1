@@ -15,36 +15,30 @@ using System.IO;
 using MySql.Data.MySqlClient;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using BrightIdeasSoftware;
+using BrightIdeasSoftware.Design;
 
 namespace ProjectTitanium
 {
     public partial class Form1 : Form
     {
-        private MySqlConnectionStringBuilder connString = new MySqlConnectionStringBuilder();
+        openCode ocode = new openCode();
 
-        string ibmshortname_checker = "";
+        //public updateApps upApps = new updateApps();
+
+        MySqlConnectionStringBuilder connString = new MySqlConnectionStringBuilder();
+        string teamname;
 
         string choices = "";
-        
-        string teamname = "";
-
-        string tablename = "";
 
         string profiledata = string.Empty;
 
         //Label lbl = new Label();
 
-        int qpchk = 0;
-
         bool launchchk = false;
 
         DataGridView dataGridView2 = new DataGridView();
         DataGridView dataGridView3 = new DataGridView();
-        DataGridView dataGridView4 = new DataGridView();
-
-        DataGridViewTextBoxColumn tblid = new System.Windows.Forms.DataGridViewTextBoxColumn();
-        DataGridViewTextBoxColumn tblnm = new System.Windows.Forms.DataGridViewTextBoxColumn();
-        DataGridViewTextBoxColumn tblloc = new System.Windows.Forms.DataGridViewTextBoxColumn();
 
         DataGridViewTextBoxColumn a1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
         DataGridViewTextBoxColumn a2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -58,31 +52,34 @@ namespace ProjectTitanium
         DataGridViewCheckBoxColumn uf = new System.Windows.Forms.DataGridViewCheckBoxColumn();
         DataGridViewCheckBoxColumn uc = new System.Windows.Forms.DataGridViewCheckBoxColumn();
 
-        AutoCompleteStringCollection mycollection = new AutoCompleteStringCollection();
+        //DataListView dlv = new DataListView();
 
         public Form1()
         {
             InitializeComponent();
 
+            connString = ((openCode)ocode).connString;
+            teamname = ((openCode)ocode).teamname;
+
             //this.Visible = false;
             //Form login = new Form1();
             //login.Show();
 
-            #if DEBUG
-                        connString.Database = "launchpad";
-                        connString.Server = "localhost";
-                        connString.UserID = "root";
-                        connString.Password = "";
-#else
-                        connString.Database = "launchpad";
-                        connString.Server = "9.190.175.12";
-                        connString.UserID = "root";
-                        connString.Password = "password";
-#endif
+            //#if DEBUG
+            //            connString.Database = "launchpad";
+            //            connString.Server = "localhost";
+            //            connString.UserID = "root";
+            //            connString.Password = "";
+            //#else
+            //            connString.Database = "launchpad";
+            //            connString.Server = "9.190.175.12";
+            //            connString.UserID = "root";
+            //            connString.Password = "password";
+            //#endif
 
-            connString.Port = 3306;
+            //connString.Port = 3306;
 
-            connString.ConvertZeroDateTime = true;
+            //connString.ConvertZeroDateTime = true;
 
             //defaultapplist();
             //button3.Enabled = false;
@@ -90,147 +87,31 @@ namespace ProjectTitanium
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            AutoLoadTeamID();
-            AutoCompleteText();
-            //this.tableLayoutPanel11.Controls.Add(lbl, 1, 2);
-            //lbl.Anchor = AnchorStyles.None;
-            //lbl.AutoSize = true;
-            //lbl.Text = "If nothing is visible, click 'Refresh'.\nSee what happens...";
-            button3_Click(sender, e);
-            
-            string userlogged = Properties.Settings.Default.lastUser.ToString();
-            userlogged = userlogged.Remove(userlogged.IndexOf('@'));
+            ocode.tb = this.textBox1;
+            ocode.AutoCompleteText();
 
-            textBox1.Text = userlogged;
-        }
-
-        void AutoCompleteText() // Enables autofill of the Tab1 (Specifically used on Tab1)
-        {
-            try
+            if (ProjectTitanium.Properties.Settings.Default.lastUser != "user" && ProjectTitanium.Properties.Settings.Default.lastUser != "")
             {
-                textBox1.AutoCompleteMode = AutoCompleteMode.Suggest;
-                textBox1.AutoCompleteSource = AutoCompleteSource.CustomSource;
-
-                using (var conn = new MySqlConnection(connString.ToString()))
-                {
-                    conn.Open();
-
-                    MySqlCommand cmd = new MySqlCommand("select * from user", conn);
-                    MySqlDataReader reader = cmd.ExecuteReader();
-
-                    string ibmshortname = "";
-
-                    while (reader.Read())
-                    {
-                        ibmshortname = reader.GetString("user_shortname");
-                        mycollection.Add(ibmshortname);
-                    }
-                }
-
-                textBox1.AutoCompleteCustomSource = mycollection;
-                textBox2.AutoCompleteCustomSource = mycollection;
-
-
-                if (ProjectTitanium.Properties.Settings.Default.lastUser != "user")
-                {
-                    textBox1.Text = ProjectTitanium.Properties.Settings.Default.lastUser.ToString();
-                }
-
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Application failed to connect to database. Please ensure connection to the database server is possible and try " +
-            "again." + "\n" + ex.Message, "Database Connection Error", MessageBoxButtons.OK);
-                this.Close();
+                textBox1.Text = Properties.Settings.Default.lastUser.ToString();
             }
         }
 
-        void AutoLoadTeamID()
-        {
-            using (var conn = new MySqlConnection(connString.ToString()))
-            {
-                string query = "SELECT id FROM team";
+        //private void newinitgrid(DataTable dt)
+        //{
+        //    dlv.CheckBoxes = true;
+        //    this.tableLayoutPanel11.Controls.Add(this.dlv, 2, 0);
+        //    dlv.DataSource = dt;
 
-                MySqlDataAdapter teamda = new MySqlDataAdapter();
-                DataTable teamdt = new DataTable();
+        //    dlv.AutoResizeColumns(); //.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
 
-                teamda.SelectCommand = new MySqlCommand(query, conn);
-                teamda.Fill(teamdt);
+        //    //ocode.addcolifnotthere(dataGridView3, ax);
+        //    //ocode.addcolifnotthere(dataGridView3, a3);
+        //    //ocode.addcolifnotthere(dataGridView3, a2);
+        //    //ocode.addcolifnotthere(dataGridView3, a1);
 
-                List<string> teams = new List<string>();
-
-                foreach (DataRow row in teamdt.Rows)
-                {
-                    teams.Add(row[0].ToString());
-                }
-                comboBox1.Items.AddRange(teams.ToArray());
-                comboBox2.Items.AddRange(teams.ToArray());
-                comboBox3.Items.AddRange(teams.ToArray());
-            }
-        }
-
-        private void addcolifnotthere(DataGridView dgv, DataGridViewTextBoxColumn c)
-        {
-            if (!(dgv.Columns.Contains(c)))
-            {
-                dgv.Columns.Insert(0, c);
-            }
-        }
-
-        private void addcolifnotthere(DataGridView dgv, DataGridViewCheckBoxColumn c)
-        {
-            if (!(dgv.Columns.Contains(c)))
-            {
-                dgv.Columns.Insert(0, c);
-            }
-        }
-
-        private void initgrid4()
-        {
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView4)).BeginInit();
-
-            dataGridView4.AutoGenerateColumns = false;
-
-            dataGridView4.AllowUserToDeleteRows = true;
-
-            this.tableLayoutPanel9.Controls.Add(this.dataGridView4, 1, 1);
-
-            // 
-            // tblid
-            // 
-            this.tblid.HeaderText = "ID";
-            this.tblid.Name = "tblid";
-            this.tblid.ReadOnly = true;
-            // 
-            // tblnm
-            // 
-            this.tblnm.HeaderText = "Name";
-            this.tblnm.Name = "tblnm";
-            // 
-            // tblloc
-            // 
-            this.tblloc.HeaderText = "Location/URL";
-            this.tblloc.Name = "tblloc";
-            // 
-            // dataGridView4
-            // 
-            this.dataGridView4.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
-            this.dataGridView4.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.tableLayoutPanel9.SetColumnSpan(this.dataGridView4, 2);
-            addcolifnotthere(dataGridView4, tblloc);
-            addcolifnotthere(dataGridView4, tblnm);
-            addcolifnotthere(dataGridView4, tblid);
-            this.dataGridView4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGridView4.Location = new System.Drawing.Point(3, 36);
-            this.dataGridView4.Name = "dataGridView4";
-            this.dataGridView4.Size = new System.Drawing.Size(982, 258);
-            this.dataGridView4.TabIndex = 5;
-            //this.dataGridView4.RowsRemoved += new DataGridViewRowsRemovedEventHandler(this.dataGridView4_RowsRemoved);
-            this.dataGridView4.UserDeletingRow += new System.Windows.Forms.DataGridViewRowCancelEventHandler(this.dataGridView4_UserDeletingRow);
-
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView4)).EndInit();
-        }
+        //    dlv.Dock = System.Windows.Forms.DockStyle.Fill;
+        //    dlv.Name = "dataListView1";
+        //}
 
         private void initgrid()
         {
@@ -248,8 +129,9 @@ namespace ProjectTitanium
             // 
             // u1
             // 
-            this.u1.HeaderText = "ID";
+            this.u1.HeaderText = "ID (Readonly)";
             this.u1.Name = "u1";
+            this.u1.ReadOnly = true;
             this.u1.Visible = false;
             this.u1.Width = 43;
             // 
@@ -258,41 +140,43 @@ namespace ProjectTitanium
             this.u2.HeaderText = "Name";
             this.u2.Name = "u2";
             this.u2.Width = 60;
+            this.u2.DefaultCellStyle.Font = new Font("Arial", 10F);
             // 
             // u3
             // 
             this.u3.HeaderText = "URL";
             this.u3.Name = "u3";
             this.u3.Width = 54;
+            this.u3.DefaultCellStyle.Font = new Font("Arial", 10F);
             // 
             // ui
             // 
             this.ui.HeaderText = "Internet Explorer";
             this.ui.Name = "ui";
-            this.ui.Width = 81;
+            this.ui.Width = 40;
             // 
             // uf
             // 
             this.uf.HeaderText = "Mozilla Firefox";
             this.uf.Name = "uf";
-            this.uf.Width = 71;
+            this.uf.Width = 40;
             // 
             // uc
             // 
             this.uc.HeaderText = "Google Chrome";
             this.uc.Name = "uc";
-            this.uc.Width = 77;
+            this.uc.Width = 40;
             // 
             // dataGridView2
             // 
             this.dataGridView2.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
             this.dataGridView2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            addcolifnotthere(dataGridView2, uc);
-            addcolifnotthere(dataGridView2, uf);
-            addcolifnotthere(dataGridView2, ui);
-            addcolifnotthere(dataGridView2, u3);
-            addcolifnotthere(dataGridView2, u2);
-            addcolifnotthere(dataGridView2, u1);
+            ocode.addcolifnotthere(dataGridView2, uc);
+            ocode.addcolifnotthere(dataGridView2, uf);
+            ocode.addcolifnotthere(dataGridView2, ui);
+            ocode.addcolifnotthere(dataGridView2, u3);
+            ocode.addcolifnotthere(dataGridView2, u2);
+            ocode.addcolifnotthere(dataGridView2, u1);
             this.dataGridView2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridView2.Location = new System.Drawing.Point(3, 245);
             this.dataGridView2.Name = "dataGridView2";
@@ -301,8 +185,9 @@ namespace ProjectTitanium
             // 
             // a1
             // 
-            this.a1.HeaderText = "ID";
+            this.a1.HeaderText = "ID (Readonly)";
             this.a1.Name = "a1";
+            this.a1.ReadOnly = true;
             this.a1.Visible = false;
             this.a1.Width = 43;
             // 
@@ -311,27 +196,29 @@ namespace ProjectTitanium
             this.a2.HeaderText = "Name of Application";
             this.a2.Name = "a2";
             this.a2.Width = 116;
+            this.a2.DefaultCellStyle.Font = new Font("Arial", 10F);
             // 
             // a3
             // 
             this.a3.HeaderText = "Location";
             this.a3.Name = "a3";
             this.a3.Width = 73;
+            this.a3.DefaultCellStyle.Font = new Font("Arial", 10F);
             // 
             // a4
             // 
             this.ax.HeaderText = "Launch";
             this.ax.Name = "ax";
-            this.ax.Width = 49;
+            this.ax.Width = 40;
             // 
             // dataGridView3
             // 
             dataGridView3.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
             dataGridView3.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            addcolifnotthere(dataGridView3, ax);
-            addcolifnotthere(dataGridView3, a3);
-            addcolifnotthere(dataGridView3, a2);
-            addcolifnotthere(dataGridView3, a1);
+            ocode.addcolifnotthere(dataGridView3, ax);
+            ocode.addcolifnotthere(dataGridView3, a3);
+            ocode.addcolifnotthere(dataGridView3, a2);
+            ocode.addcolifnotthere(dataGridView3, a1);
             dataGridView3.Dock = System.Windows.Forms.DockStyle.Fill;
             dataGridView3.Location = new System.Drawing.Point(3, 43);
             dataGridView3.Name = "dataGridView3";
@@ -374,14 +261,19 @@ namespace ProjectTitanium
 
                 dataGridView3.DataSource = appdt;
                 dataGridView2.DataSource = urldt;
+
+
+
+                //newinitgrid(appdt);
             }
+
             try
             {
                 checkchoices(profiledata);
             }
-            catch
+            catch (Exception x)
             {
-
+                MessageBox.Show(x.Message, "Load Data Error 272");
             }
         }
 
@@ -460,9 +352,7 @@ namespace ProjectTitanium
 
         private void button3_Click(object sender, EventArgs e)
         {
-            //lbl.Dispose();
-
-            Clear_All_Text(tableLayoutPanel11);
+            ocode.Clear_All_Text(tableLayoutPanel11);
 
             loaddata(teamname);
         }
@@ -471,91 +361,23 @@ namespace ProjectTitanium
         {
             button7_Click(sender, e);
 
-            //#if DEBUG
+            #if DEBUG
+                MessageBox.Show("Batch file created and executed. Program waits for the process and then deletes the batch file. Launch success message shown later.");
+            #else
+                launchchk = true;
+                string[] flines = batchmodifyer();
 
-            //#else
-            launchchk = true;
-            string[] flines = batchmodifyer();
+                File.WriteAllLines(@"C:\launchbatch.bat", flines);
 
-            File.WriteAllLines(@"C:\launchbatch.bat", flines);
-
-            var process = Process.Start(@"C:\launchbatch.bat");
-            if (process.HasExited == true)
-            {
-                File.Delete(@"C:\launchbatch.bat");
-            }
-
-            MessageBox.Show("Launch Successful!", "Success");
-            launchchk = false;
-            //#endif
-        }
-
-        private void button5_Click(object sender, EventArgs e)
-        {
-            using (MySqlConnection conn5 = new MySqlConnection(connString.ToString()))
-            {
-                if (conn5.State.ToString() != "Open")
+                var process = Process.Start(@"C:\launchbatch.bat");
+                if (process.HasExited == true)
                 {
-                    conn5.Open();
+                    File.Delete(@"C:\launchbatch.bat");
                 }
 
-                DataTable changesapp = ((DataTable)dataGridView3.DataSource).GetChanges();
-                DataTable changesurl = ((DataTable)dataGridView2.DataSource).GetChanges();
-
-                MySqlDataAdapter mdp = new MySqlDataAdapter();
-
-                if (changesapp != null)
-                {
-                    foreach (DataRow row in changesapp.Rows)
-                    {
-                        string s = "";
-                        s = "INSERT INTO app(appid, app_name, app_loc) VALUES(@id, @name, @loc) ON DUPLICATE KEY UPDATE app_name = @name, app_loc = @loc";
-                        Execute_Query(s, row);
-                    }
-                    MessageBox.Show("Apps Updated!!", "Success");
-                }
-
-                if (changesurl != null)
-                {
-                    foreach (DataRow row in changesurl.Rows)
-                    {
-                        string s = "";
-                        s = "INSERT INTO url(urlid, url_name, url_loc) VALUES(@id, @name, @loc) ON DUPLICATE KEY UPDATE url_name = @name, url_loc = @loc";
-                        Execute_Query(s, row);
-                    }
-                    MessageBox.Show("URLs Updated!!", "Success");
-                }
-            }
-        }
-
-        private void Execute_Query(string s)
-        {
-            using (var conn = new MySqlConnection(connString.ToString()))
-            {
-                conn.Open();
-                var cmd = new MySqlCommand(s, conn);
-               
-                cmd.ExecuteNonQuery();
-            }
-        }
-
-        private void Execute_Query(string s, DataRow dr)
-        {
-            using (var conn = new MySqlConnection(connString.ToString()))
-            {
-                conn.Open();
-
-                // Notice how there a 'using' for MySqlCommand, instead of just the connection? Weird, isn't it :)
-
-                using (var cmd = new MySqlCommand(s, conn))
-                {
-                    cmd.Parameters.AddWithValue("@id", dr[0].ToString());
-                    cmd.Parameters.AddWithValue("@name", dr[1].ToString());
-                    cmd.Parameters.AddWithValue("@loc", dr[2].ToString());
-
-                    cmd.ExecuteNonQuery();
-                }
-            }
+                MessageBox.Show("Launch Successful!", "Success");
+                launchchk = false;
+            #endif
         }
 
         private void button6_Click(object sender, EventArgs e)
@@ -719,295 +541,164 @@ namespace ProjectTitanium
 
             return flines;
         }
-
-        private bool usernprofile()
-        {
-            bool verdict = true;
-
-            //string s = Properties.Settings.Default.lastUser.ToString();
-            //s = s.Remove(s.IndexOf('@'));
-
-            radioButton3.Checked = true;
-            //textBox1.Text = s;
-
-            if (textBox1.Text == "" && !(tableLayoutPanel7.Controls.OfType<RadioButton>().Any(r => r.Checked)))
-            {
-                MessageBox.Show("Please specify the user and the profile to load/save choices.", "Username required");
-                verdict = false;
-            }
-            else if (textBox1.Text == "" || !(tableLayoutPanel7.Controls.OfType<RadioButton>().Any(r => r.Checked)))
-            {
-                if (!(tableLayoutPanel7.Controls.OfType<RadioButton>().Any(r => r.Checked)))
-                {
-                    MessageBox.Show("Please specify the profile to load/save choices to.", "Username required");
-                }
-
-                if (textBox1.Text == "")
-                {
-                    MessageBox.Show("Please specify the user to load/save choices.", "Username required");
-                }
-
-                verdict = false;
-            }
-            else
-            {
-                verdict = true;
-            }
-
-            return verdict;
-        }
-
+        
         private void button7_Click(object sender, EventArgs e)
         {
             launchchk = false;
-            if (usernprofile() == true)
+            if (textBox1.Text != "")
             {
                 string[] _unused = batchmodifyer();
                 string ibmshortname = "";
                 ibmshortname = textBox1.Text;
-                //string profilename = "";
-                //profilename = tableLayoutPanel7.Controls.OfType<RadioButton>().FirstOrDefault(r => r.Checked).Text;
 
-                string profilename = "Profile #1";
+                string profilename = ibmshortname + "_" + teamname;
                 using (var conn = new MySqlConnection(connString.ToString()))
                 {
                     conn.Open();
 
                     string s = "INSERT INTO profile(user_user_shortname, profiledata, profile_name) VALUES('" + ibmshortname + "', '" + choices + "', '" + profilename + "') ON DUPLICATE KEY UPDATE profiledata = '" + choices + "'";
-                    Execute_Query(s);
+                    ocode.Execute_Query(s);
                 }
 
                 MessageBox.Show("User preferences saved to database.", "Success");
+            }
+            else
+            {
+                MessageBox.Show("Please specify the user.", "Username required");
             }
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             string ibmshortname = "";
-            using (var conn = new MySqlConnection(connString.ToString()))
-            {
-                conn.Open();
 
-                ibmshortname = textBox1.Text;
-            }
+            ibmshortname = textBox1.Text;
 
-            try
+            if (ocode.mycollection.Contains(ibmshortname))
             {
-                using (var conn = new MySqlConnection(connString.ToString()))
+                try
                 {
-                    MySqlCommand command = new MySqlCommand("Select team_id from user where user_shortname='" + ibmshortname + "'", conn);
-                    command.Connection.Open();
-                    teamname = (string)command.ExecuteScalar();
-                    //MessageBox.Show("Team name for " + ibmshortname + " is = " + teamname);
+                    comboBox2.Items.Clear();
+                    comboBox2.Items.AddRange((ocode.AutoLoadTeamID(ibmshortname)).ToArray());
+                    comboBox2.SelectedIndex = 0;
+                    teamname = comboBox2.Text;
+                    button8_Click(sender, e);
                 }
-                comboBox2.SelectedIndex = comboBox2.Items.IndexOf(teamname);
-                radioButton3.Checked = true;
-                button8_Click(sender, e);
-            }
-            catch(Exception x)
-            {
-                //MessageBox.Show("Error: " + x.Message);
-            }
-            finally
-            {
-                Properties.Settings.Default.lastUser = ibmshortname;
-                Properties.Settings.Default.team_id = teamname;
-                Properties.Settings.Default.Save();
+                catch (Exception x)
+                {
+                    MessageBox.Show(x.Message, "Team Selection Error 585");
+                }
+                finally
+                {
+                    Properties.Settings.Default.lastUser = ibmshortname;
+                    Properties.Settings.Default.team_id = teamname;
+                    Properties.Settings.Default.Save();
 
-                //MessageBox.Show("USING SETINGS: " + Properties.Settings.Default.lastUser + " is IN = " + Properties.Settings.Default.team_id);
+                    //MessageBox.Show("USING SETINGS: " + Properties.Settings.Default.lastUser + " is IN = " + Properties.Settings.Default.team_id);
+                }
+            }
+            else
+            {
+                comboBox2.SelectedIndex = -1;
+                label8.Text = "";
+                ocode.Clear_All_Text(this.tableLayoutPanel11);
             }
         }
 
-        private void textBox2_TextChanged(object sender, EventArgs e)
-        {
-            using (var conn = new MySqlConnection(connString.ToString()))
-            {
-                conn.Open();
+        //private void button1_Click(object sender, EventArgs e)
+        //{
+        //    if (qpchk == 0)
+        //    {
+        //        string addormod = button1.Text.ToString();
 
-                ibmshortname_checker = textBox2.Text;
-            }
-        }
+        //        if ((MessageBox.Show("Are you sure you want to " + addormod + " user: " + ibmshortname_checker + ", to database??", "Confirmation", MessageBoxButtons.OKCancel)) == DialogResult.OK)
+        //        {
+        //            using (var conn = new MySqlConnection(connString.ToString()))
+        //            {
+        //                conn.Open();
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            if (qpchk == 0)
-            {
-                string addormod = button1.Text.ToString();
+        //                string fullname = "";
+        //                fullname = textBox3.Text;
+        //                string teamid = "";
+        //                teamid = comboBox1.Text;
 
-                if ((MessageBox.Show("Are you sure you want to " + addormod + " user: " + ibmshortname_checker + ", to database??", "Confirmation", MessageBoxButtons.OKCancel)) == DialogResult.OK)
-                {
-                    using (var conn = new MySqlConnection(connString.ToString()))
-                    {
-                        conn.Open();
+        //                string s = "";
+        //                s = "INSERT INTO user(user_shortname, user_name, team_id) VALUES('" + ibmshortname_checker + "', '" + fullname + "', '" + teamid + "') ON DUPLICATE KEY UPDATE user_name = '" + fullname + "', team_id = '" + teamid + "'";
+        //                try
+        //                {
+        //                    Execute_Query(s);
+        //                }
+        //                catch (MySqlException ex)
+        //                {
+        //                    MessageBox.Show(ex.ToString());
+        //                }
 
-                        string fullname = "";
-                        fullname = textBox3.Text;
-                        string teamid = "";
-                        teamid = comboBox1.Text;
+        //                if(addormod == "Add")
+        //                {
+        //                    adddefprofile(ibmshortname_checker);
+        //                }
+        //            }
+        //            MessageBox.Show("User added/modified!", "Up top!");
+        //        }
+        //        else
+        //        {
+        //            MessageBox.Show("User was not added to database.", "Add User Cancelled");
+        //            Clear_All_Text(tableLayoutPanel1);
+        //        }
+        //    }
+        //    else if (qpchk == 1)
+        //    {
+        //        if ((MessageBox.Show("Are you sure you want to add multiple users to database??", "Confirmation", MessageBoxButtons.OKCancel)) == DialogResult.OK)
+        //        {
+        //            using (MySqlConnection conn = new MySqlConnection(connString.ToString()))
+        //            {
+        //                conn.Open();
 
-                        string s = "";
-                        s = "INSERT INTO user(user_shortname, user_name, team_id) VALUES('" + ibmshortname_checker + "', '" + fullname + "', '" + teamid + "') ON DUPLICATE KEY UPDATE user_name = '" + fullname + "', team_id = '" + teamid + "'";
-                        try
-                        {
-                            Execute_Query(s);
-                        }
-                        catch (MySqlException ex)
-                        {
-                            MessageBox.Show(ex.ToString());
-                        }
+        //                foreach (DataGridViewRow row in dataGridView1.Rows)
+        //                {
+        //                    string ibmshortname = "";
+        //                    string fullname = "";
+        //                    string teamid = "";
 
-                        if(addormod == "Add")
-                        {
-                            adddefprofile(ibmshortname_checker);
-                        }
-                    }
-                    MessageBox.Show("User added/modified!", "Up top!");
-                }
-                else
-                {
-                    MessageBox.Show("User was not added to database.", "Add User Cancelled");
-                    Clear_All_Text(tableLayoutPanel1);
-                }
-            }
-            else if (qpchk == 1)
-            {
-                if ((MessageBox.Show("Are you sure you want to add multiple users to database??", "Confirmation", MessageBoxButtons.OKCancel)) == DialogResult.OK)
-                {
-                    using (MySqlConnection conn = new MySqlConnection(connString.ToString()))
-                    {
-                        conn.Open();
+        //                    ibmshortname = row.Cells["Column1"].Value.ToString();
+        //                    fullname = row.Cells["Column2"].Value.ToString();
+        //                    try
+        //                    {
+        //                        teamid = row.Cells["Column3"].Value.ToString();
+        //                    }
+        //                    catch
+        //                    {
+        //                        teamid = "IBM";
+        //                    }
 
-                        foreach (DataGridViewRow row in dataGridView1.Rows)
-                        {
-                            string ibmshortname = "";
-                            string fullname = "";
-                            string teamid = "";
+        //                    string s = "";
+        //                    s = "INSERT INTO user(user_shortname, user_name, team_id) VALUES('" + ibmshortname_checker + "', '" + fullname + "', '" + teamid + "') ON DUPLICATE KEY UPDATE user_name = '" + fullname + "', team_id = '" + teamid + "'";
+        //                    try
+        //                    {
+        //                        Execute_Query(s);
+        //                    }
+        //                    catch (MySqlException ex)
+        //                    {
+        //                        MessageBox.Show(ex.ToString());
+        //                    }
 
-                            ibmshortname = row.Cells["Column1"].Value.ToString();
-                            fullname = row.Cells["Column2"].Value.ToString();
-                            try
-                            {
-                                teamid = row.Cells["Column3"].Value.ToString();
-                            }
-                            catch
-                            {
-                                teamid = "IBM";
-                            }
-
-                            string s = "";
-                            s = "INSERT INTO user(user_shortname, user_name, team_id) VALUES('" + ibmshortname_checker + "', '" + fullname + "', '" + teamid + "') ON DUPLICATE KEY UPDATE user_name = '" + fullname + "', team_id = '" + teamid + "'";
-                            try
-                            {
-                                Execute_Query(s);
-                            }
-                            catch (MySqlException ex)
-                            {
-                                MessageBox.Show(ex.ToString());
-                            }
-
-                            adddefprofile(ibmshortname);
-                        }
-                    }
-                    MessageBox.Show("Users added!!", "Up top!");
-                }
-                else
-                {
-                    MessageBox.Show("No users were added to database.", "Add Users Cancelled");
-                    Clear_All_Text(tableLayoutPanel1);
-                }
-            }
-        }
-
-        private void adddefprofile(string ibmname)
-        {
-            string defprofilename = "Profile #1";
-            string defchoices = "x4.x5.x6.x7.x8.c1.f2.f4.f5.i6.f8.";
-            using (var conn = new MySqlConnection(connString.ToString()))
-            {
-                conn.Open();
-
-                string s = "INSERT INTO profile(user_user_shortname, profiledata, profile_name) VALUES('" + ibmname + "', '" + defchoices + "', '" + defprofilename + "') ON DUPLICATE KEY UPDATE profiledata = '" + defchoices + "'";
-                Execute_Query(s);
-            }
-        }
-
-        private void radioButton1_Click(object sender, EventArgs e)
-        {
-            if(radioButton1.Checked == true)
-            {
-                button1.Text = "Add";
-            }
-            else if(radioButton2.Checked == true)
-            {
-                button1.Text = "Modify";
-            }
-
-            //Clear_All_Text(tableLayoutPanel1);
-        }
-
-        public void Clear_All_Text(Control con) // Clears all input controls on the function it's invocked from
-        {
-            foreach (Control c in con.Controls)
-            {
-                if (c is System.Windows.Forms.TextBox || c is ComboBox || c is RichTextBox || c is DataGridView || c is RadioButton || c is CheckBox)
-                {
-                    if (c is System.Windows.Forms.TextBox)
-                    {
-                        ((System.Windows.Forms.TextBox)c).ResetText();
-                    }
-
-                    if (c is ComboBox)
-                    {
-                        if (((ComboBox)c).DropDownStyle == ComboBoxStyle.DropDownList)
-                        {
-                            ((ComboBox)c).Text = null;
-                        }
-                        else
-                        {
-                            ((ComboBox)c).ResetText();
-                        }
-                    }
-
-                    if (c is RichTextBox)
-                    {
-                        ((RichTextBox)c).ResetText();
-                    }
-
-                    if (c is DataGridView)
-                    {
-                        ((DataGridView)c).DataSource = null;
-
-                        //((DataGridView)c).Columns.Clear();
-
-                        c.DataBindings.Clear();
-                    }
-                    
-                    if(c is RadioButton)
-                    {
-                        ((RadioButton)c).Checked = false;
-                    }
-
-                    if (c is CheckBox)
-                    {
-                        ((CheckBox)c).Checked = false;
-                    }
-                }
-                else
-                {
-                    Clear_All_Text(c);
-                }
-            }
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-           Clear_All_Text(tableLayoutPanel1);
-        }
+        //                    adddefprofile(ibmshortname);
+        //                }
+        //            }
+        //            MessageBox.Show("Users added!!", "Up top!");
+        //        }
+        //        else
+        //        {
+        //            MessageBox.Show("No users were added to database.", "Add Users Cancelled");
+        //            Clear_All_Text(tableLayoutPanel1);
+        //        }
+        //    }
+        //}
 
         private void button8_Click(object sender, EventArgs e)
         {
             label8.Text = "";
-            if (usernprofile() == true)
+            if (textBox1.Text != "")
             {
                 string ibmshortname = "";
                 ibmshortname = textBox1.Text;
@@ -1015,7 +706,7 @@ namespace ProjectTitanium
                 //profilename = tableLayoutPanel7.Controls.OfType<RadioButton>().FirstOrDefault(r => r.Checked).Text;
                 profiledata = string.Empty;
 
-                string profilename = "Profile #1";
+                string profilename = ibmshortname + "_" + teamname;
 
                 using (var conn = new MySqlConnection(connString.ToString()))
                 {
@@ -1037,7 +728,7 @@ namespace ProjectTitanium
                     {
                         label8.Text = "Profile Found!!";
                         button3_Click(sender, e);
-                        checkchoices(profiledata);
+                        //checkchoices(profiledata);
                     }
                     else
                     {
@@ -1048,6 +739,10 @@ namespace ProjectTitanium
                     }
                 }
             }
+            else
+            {
+                MessageBox.Show("Please specify the user.", "Username required");
+            }
         }
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1056,267 +751,82 @@ namespace ProjectTitanium
             abtbx.StartPosition = FormStartPosition.CenterParent;
             abtbx.ShowDialog();
         }
-
-        private void dataGridView4_UserDeletingRow(object sender, DataGridViewRowCancelEventArgs e)
-        {
-            DataGridViewRow startingBalanceRow = this.dataGridView4.Rows[e.Row.Index];
-
-            if ((MessageBox.Show("Are you sure you want to remove '" + dataGridView4.Rows[e.Row.Index].Cells["tblnm"].Value.ToString() + "' from " + teamname + " team??", "Confirmation", MessageBoxButtons.OKCancel)) == DialogResult.OK)
-            {
-                dataGridView4_RowsRemoved(startingBalanceRow);
-            }
-            else
-            {
-                // Do not allow the user to delete the Starting Balance row.
-                MessageBox.Show("Deletion of " + startingBalanceRow.Cells["tblnm"].Value.ToString() + " was cancelled successfully!", "Deletion Cancelled");
-
-                // Cancel the deletion if the Starting Balance row is included.
-                e.Cancel = true;
-            }
-        }
-
-        //private void dataGridView4_RowsRemoved(object sender, DataGridViewRowsRemovedEventArgs e)
-        //{
-        private void dataGridView4_RowsRemoved(DataGridViewRow row)
-        {
-            try
-            {
-                //if ((MessageBox.Show("Are you sure you want to delete " + dataGridView4.Rows[e.RowIndex].Cells["tblnm"].Value.ToString() + " from " + tablename + "??", "Confirmation", MessageBoxButtons.OKCancel)) == DialogResult.OK)
-                //{
-                //DataGridViewRow row = new DataGridViewRow();
-                //row = dataGridView4.Rows[e.RowIndex];
-
-                using (MySqlConnection conn = new MySqlConnection(connString.ToString()))
-                {
-                    if (conn.State.ToString() != "Open")
-                    {
-                        conn.Open();
-                    }
-
-                    if (tablename == "App")
-                    {
-                        string s = "";
-                        s = "DELETE FROM team_app WHERE team_id='" + teamname + "' and app_appid='" + row.Cells["tblid"].Value.ToString() + "'";
-
-                        var cmd = new MySqlCommand(s, conn);
-                        cmd.ExecuteNonQuery();
-
-                        MessageBox.Show(row.Cells["tblnm"].Value.ToString() + " successfully removed from " + teamname + "!", "Successful Deletion");
-                    }
-                    else if (tablename == "URL")
-                    {
-                        string s = "";
-                        s = "DELETE FROM team_url WHERE team_id='" + teamname + "' and url_urlid='" + row.Cells["tblid"].Value.ToString() + "'";
-
-                        var cmd = new MySqlCommand(s, conn);
-                        cmd.ExecuteNonQuery();
-
-                        MessageBox.Show(row.Cells["tblnm"].Value.ToString() + " successfully removed from " + teamname + "!", "Successful Deletion");
-                    }
-                }
-                //}
-            }
-            catch
-            {
-
-            }
-        }
-
-        private void button9_Click(object sender, EventArgs e)
-        {
-            if (comboBox3.Text=="" || !(tableLayoutPanel10.Controls.OfType<RadioButton>().Any(r => r.Checked)))
-            {
-                MessageBox.Show("Please ensure a team is selected and either 'App' or 'URL' table is selected.", "Selection Required");
-            }
-            else
-            {
-                tablename = tableLayoutPanel10.Controls.OfType<RadioButton>().FirstOrDefault(r => r.Checked).Text;
-                teamname = comboBox3.Text;
-
-                Clear_All_Text(tableLayoutPanel9);
-
-                initgrid4();
-
-                using (var conn = new MySqlConnection(connString.ToString()))
-                {
-                    conn.Open();
-
-                    MySqlDataAdapter tableda = new MySqlDataAdapter();
-                    DataTable tabledt = new DataTable();
-                    
-                    string s = "";
-
-                    if (tablename == "App")
-                    {
-                        s = "SELECT a.appid, a.app_name, a.app_loc from app a INNER JOIN team_app ta ON a.appid=ta.app_appid where ta.team_id='" + teamname + "'";
-                    }
-                    else if (tablename == "URL")
-                    {
-                        s = "SELECT u.urlid, u.url_name, u.url_loc from url u INNER JOIN team_url ta ON u.urlid=ta.url_urlid where ta.team_id='" + teamname + "'";
-                    }
-
-                    tableda.SelectCommand = new MySqlCommand(s, conn);
-                    tableda.Fill(tabledt);
-
-                    for (int i = 0; i < 3; i++)
-                    {
-                        if (dataGridView4.Columns[i].DataPropertyName != tabledt.Columns[i].ColumnName.ToString())
-                        {
-                            dataGridView4.Columns[i].DataPropertyName = tabledt.Columns[i].ColumnName.ToString();
-                        }
-                    }
-
-                    dataGridView4.DataSource = tabledt;
-                }
-            }
-        }
-
+        
         private void button10_Click(object sender, EventArgs e)
         {
-            if ((MessageBox.Show("Are you sure you want to update all changes to " + tablename + " for " + teamname + "??", "Confirmation", MessageBoxButtons.OKCancel)) == DialogResult.OK)
-            {
-                string name = "";
-                using (MySqlConnection conn = new MySqlConnection(connString.ToString()))
-                {
-                    if (conn.State.ToString() != "Open")
-                    {
-                        conn.Open();
-                    }
-
-                    MySqlDataAdapter tableda = new MySqlDataAdapter();
-
-                    DataTable changestable = ((DataTable)dataGridView4.DataSource).GetChanges();
-
-                    if (changestable != null)
-                    {
-                        if (tablename == "App")
-                        {
-                            foreach (DataRow row in changestable.Rows)
-                            {
-                                string s = "";
-                                name = row["app_name"].ToString();
-                                s = "INSERT INTO app(appid, app_name, app_loc) VALUES(@id, @name, @loc) ON DUPLICATE KEY UPDATE app_name = @name, app_loc = @loc";
-                                Execute_Query(s, row);
-
-                                string q = "";
-                                q = "INSERT INTO team_app(team_id, app_appid) VALUES ('" + teamname + "',(SELECT appid FROM app WHERE app_name='" + name + "')) ON DUPLICATE KEY UPDATE team_id='" + teamname + "', app_appid=(SELECT appid FROM app WHERE app_name='" + name + "')";
-                                Execute_Query(q, row);
-                            }
-                            MessageBox.Show("Apps Updated!!", "Success");
-                        }
-                        else if (tablename == "URL")
-                        {
-                            foreach (DataRow row in changestable.Rows)
-                            {
-                                string s = "";
-                                name = row["url_name"].ToString();
-                                s = "INSERT INTO url(urlid, url_name, url_loc) VALUES(@id, @name, @loc) ON DUPLICATE KEY UPDATE url_name = @name, url_loc = @loc";
-                                Execute_Query(s, row);
-
-                                string q = "";
-                                q = "INSERT INTO team_url(team_id, url_urlid) VALUES ('" + teamname + "',(SELECT urlid FROM url WHERE url_name='" + name + "')) ON DUPLICATE KEY UPDATE team_id='" + teamname + "', url_urlid=(SELECT urlid FROM url WHERE url_name='" + name + "')";
-                                Execute_Query(q, row);
-                            }
-                            MessageBox.Show("URLs Updated!!", "Success");
-                        }
-                    }
-                    else
-                    {
-                        MessageBox.Show("No updates found.", "Info");
-                    }
-                }
-            }
-        }
-
-        private void button11_Click(object sender, EventArgs e)
-        {
-            DataObject o = (DataObject)Clipboard.GetDataObject();
-
-            if (o.GetDataPresent(DataFormats.Text))
-            {
-                if (dataGridView1.RowCount > 0)
-                {
-                    dataGridView1.Rows.Clear();
-                }
-
-                if (dataGridView1.ColumnCount > 0)
-                {
-                    dataGridView1.Columns.Clear();
-                }
-
-                bool columnsAdded = false;
-                string[] pastedRows = Regex.Split(o.GetData(DataFormats.Text).ToString().TrimEnd("\r\n".ToCharArray()), "\r\n");
-
-                int myRowIndex = 0;
-
-                foreach (string pastedRow in pastedRows)
-                {
-                    string[] pastedRowCells = pastedRow.Split(new char[] { '\t' });
-
-                    if (!columnsAdded)
-                    {
-                        for (int i = 0; i < pastedRowCells.Length; i++)
-                        {
-                            //dataGridView1.Columns.Add(pastedRowCells[i].ToString(), pastedRowCells[i]);
-                            dataGridView1.Columns.Add("Column"+(i+1), pastedRowCells[i]);
-                        }
-
-                        columnsAdded = true;
-                        dataGridView1.Rows.Add();
-                        continue;
-                    }
-                    else
-                    {
-                        if (dataGridView1.Rows.Count == 0) { myRowIndex = 0; } else { myRowIndex = dataGridView1.Rows.Count - 1; }
-
-                        dataGridView1.Rows.Add();
-
-                        using (DataGridViewRow myDataGridViewRow = dataGridView1.Rows[myRowIndex])
-                        {
-                            for (int i = 0; i < pastedRowCells.Length; i++)
-                            {
-                                myDataGridViewRow.Cells[i].Value = pastedRowCells[i];
-                            }
-                        }
-                        dataGridView1.Update();
-                        dataGridView1.EndEdit();
-                    }
-                }
-
-                dataGridView1.Rows.RemoveAt((dataGridView1.RowCount - 1));
-            }
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Alt && e.Control && e.KeyCode == Keys.A)
+            // Keydown not needed after making seperate forms
+            //if (e.Alt && e.Control && e.KeyCode == Keys.A)
+            //{
+            //    if (tableLayoutPanel8.Visible == false)
+            //    {
+            //        tableLayoutPanel8.Visible = true;
+            //    }
+            //    else if (tableLayoutPanel8.Visible == true)
+            //    {
+            //        tableLayoutPanel8.Visible = false;
+            //    }
+            //}
+        }
+
+        private void addNewInfoToDatabaseToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Hi there. \n\nThe app is still under development, and new teams would need to be added by me for now. \n\nIf you need any new team added, or any new feature, or have any issues, please contact 'asolanki@au1.ibm.com' via Sametime or email. \n\nThank you.", "Information");
+        }
+
+        private void addUsersToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            addUser addU = new addUser();
+            addU.StartPosition = FormStartPosition.CenterParent;
+            if(addU.ShowDialog() == DialogResult.OK)
             {
-                if (tableLayoutPanel8.Visible == false)
-                {
-                    tableLayoutPanel8.Visible = true;
-                }
-                else
-                {
-                    tableLayoutPanel8.Visible = false;
-                }
+                ocode.tb = this.textBox1;
+                ocode.AutoCompleteText();
             }
         }
 
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        private void updateAppsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if(checkBox1.CheckState == CheckState.Checked)
+            updateApps upApps = new updateApps();
+            upApps.StartPosition = FormStartPosition.CenterParent;
+            upApps.Text = sender.ToString();
+            upApps.ShowDialog();
+        }
+
+        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string ibmshortname = "";
+
+            ibmshortname = textBox1.Text;
+
+            if (ocode.mycollection.Contains(ibmshortname))
             {
-                qpchk = 1;
-                tableLayoutPanel13.Enabled = false;
-                button11.Enabled = true;
-                dataGridView1.Enabled = true;
+                try
+                {
+                    teamname = comboBox2.Text;
+                    button8_Click(sender, e);
+                }
+                catch (Exception x)
+                {
+                    MessageBox.Show(x.Message, "Team Selection Error 810");
+                }
+                finally
+                {
+                    Properties.Settings.Default.lastUser = ibmshortname;
+                    Properties.Settings.Default.team_id = teamname;
+                    Properties.Settings.Default.Save();
+
+                    //MessageBox.Show("USING SETINGS: " + Properties.Settings.Default.lastUser + " is IN = " + Properties.Settings.Default.team_id);
+                }
             }
             else
             {
-                qpchk = 0;
-                tableLayoutPanel13.Enabled = true;
-                button11.Enabled = false;
-                dataGridView1.Enabled = false;
+                comboBox2.SelectedIndex = -1;
+                label8.Text = "";
+                ocode.Clear_All_Text(this.tableLayoutPanel11);
             }
         }
     }

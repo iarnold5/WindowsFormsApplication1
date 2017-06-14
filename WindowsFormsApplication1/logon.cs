@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -28,37 +29,37 @@ namespace ProjectTitanium
             loggingIn.Visible=false;
         }
 
-        //private void logon_Load(object sender, EventArgs e)
-        //{
-        //    loggingIn.Hide();
+        private void logon_Load(object sender, EventArgs e)
+        {
+            loggingIn.Hide();
 
-        //    filluser();
-        //}
+            //filluser();
+        }
 
         //void filluser()
         //{
         //    //try
         //    //{
-        //        //txtUsername.AutoCompleteSource = AutoCompleteSource.CustomSource;
+        //    //txtUsername.AutoCompleteSource = AutoCompleteSource.CustomSource;
 
-        //        //txtUsername.AutoCompleteCustomSource = Properties.Settings.Default.listUsers ;
-        //        string[] list = new string[Properties.Settings.Default.listUsers.Count];
-        //        list = Properties.Settings.Default.listUsers.Cast<string>().ToArray();
-        //        if (list.Length != 0)
-        //        {
-        //            string s = "user@au1.ibm.com";
-        //            Properties.Settings.Default.listUsers.Add(s);
+        //    //txtUsername.AutoCompleteCustomSource = Properties.Settings.Default.listUsers ;
+        //    string[] list = new string[Properties.Settings.Default.listUsers.Count];
+        //    list = Properties.Settings.Default.listUsers.Cast<string>().ToArray();
+        //    if (list.Length != 0)
+        //    {
+        //        string s = "user@au1.ibm.com";
+        //        Properties.Settings.Default.listUsers.Add(s);
 
-        //            AutoCompleteStringCollection source = new AutoCompleteStringCollection();
-        //            source.AddRange(list);
-        //            txtUsername.AutoCompleteMode = AutoCompleteMode.Suggest;
-        //            txtUsername.AutoCompleteSource = AutoCompleteSource.CustomSource;
-        //            txtUsername.AutoCompleteCustomSource = source;
-        //        }
-        //        else
-        //        {
-        //            return;
-        //        }
+        //        AutoCompleteStringCollection source = new AutoCompleteStringCollection();
+        //        source.AddRange(list);
+        //        txtUsername.AutoCompleteMode = AutoCompleteMode.Suggest;
+        //        txtUsername.AutoCompleteSource = AutoCompleteSource.CustomSource;
+        //        txtUsername.AutoCompleteCustomSource = source;
+        //    }
+        //    else
+        //    {
+        //        return;
+        //    }
         //    //}
         //    //catch (Exception ex)
         //    //{
@@ -97,10 +98,10 @@ namespace ProjectTitanium
                 DirectorySearcher searcher = new DirectorySearcher(oRoot);
                 searcher.PropertiesToLoad.Add("c");
                 searcher.PropertiesToLoad.Add("uid");
-                // searcher.PropertiesToLoad.AddRange(New String() {"cn", "mail"})
+                
+                //searcher.PropertiesToLoad.AddRange(New String() { "cn", "mail"})
                 // would also work and saves you some code
-
-
+                
                 //searcher.Filter = "(emailAddress=" & txtUsername.Text & ")"
                 searcher.Filter = "(&(emailAddress=" + txtUsername.Text + "))";
 
@@ -128,7 +129,9 @@ namespace ProjectTitanium
 
             if (connectSuccess)
             {
-                Properties.Settings.Default.lastUser = txtUsername.Text;
+                string s = txtUsername.Text;
+                Properties.Settings.Default.lastUserEmail = s;
+                Properties.Settings.Default.lastUser = s.TrimEnd('@');
                 Properties.Settings.Default.Save();
                 this.DialogResult = DialogResult.OK;
                 this.Close();
@@ -141,6 +144,28 @@ namespace ProjectTitanium
             }
             //this.Close();
         }
+
+        //public static bool IsAuthenticated(string ldap, string usr, string pwd)
+        //{
+        //    bool authenticated = false;
+
+        //    try
+        //    {
+        //        DirectoryEntry entry = new DirectoryEntry(ldap, usr, pwd);
+        //        object nativeObject = entry.NativeObject;
+        //        authenticated = true;
+        //    }
+        //    catch (DirectoryServicesCOMException cex)
+        //    {
+        //        MessageBox.Show(cex.Message);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show(ex.Message);
+        //    }
+
+        //    return authenticated;
+        //}
 
         private void button2_Click(object sender, EventArgs e)
         {

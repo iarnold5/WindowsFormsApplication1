@@ -16,10 +16,15 @@ namespace ProjectTitanium
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            //if (new logon().ShowDialog() == DialogResult.OK)
-            //{
+#if DEBUG
+            Application.Run(new Form1());
+#else
+            if (new logon().ShowDialog() == DialogResult.OK)
+            {
                 Application.Run(new Form1());
-            //}
+            }
+#endif
+
         }
     }
 }
